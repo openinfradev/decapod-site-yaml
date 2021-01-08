@@ -1,0 +1,140 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  labels:
+    name: cloud-console
+  name: cloud-console
+spec:
+  chart:
+    name: cloud-console
+    repository: https://openinfradev.github.io/hanu-helm-repo
+    version: 1.0.0
+  releaseName: cloud-console
+  targetNamespace: fed
+  values:
+    config:
+      extra:
+        config: ""
+        sql: "/* INSERT CLUSTER AND MENU DATA FOR SKB-DOJ-DEV */\nINSERT INTO \"cluster\"
+          VALUES (\n  'siim-dev',\n  'http://taco-kibana-dashboard-kb-http.lma.svc.siim-dev:5601',\n
+          \ 'http://grafana.fed.svc.siim-dev',\n  'https://kubernetes.default.svc',\n
+          \ 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM2RGdIa0ozcERfUkNnYy04UzYwbU5oRzVFSGhjS0stR0VWcVBhN0d0eUUifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJsbWEiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoicHJvbWV0aGV1cy1wcm9jZXNzLWV4cG9ydGVyLXByb2Nlc3MtZXhwb3J0ZXItdG9rZW4tODJtYmQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoicHJvbWV0aGV1cy1wcm9jZXNzLWV4cG9ydGVyLXByb2Nlc3MtZXhwb3J0ZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI3N2JlZmE0Yy1jODIzLTRlMWUtODY1ZC03OTUwMjlkYjY0ZjciLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6bG1hOnByb21ldGhldXMtcHJvY2Vzcy1leHBvcnRlci1wcm9jZXNzLWV4cG9ydGVyIn0.FAZLt9EIGQXfMrI7j-L3T-wb0_ct44RtTKmvMp2yb0cetFaoNCyAb3QUkvqs6NOH0_YLmOLQx60_DXkkeRwxOdAeLhB4gsR3mZDI9kQGgxFkJFuqXal_ij30W9TMVwEu7OdaSySbTHKPfv2F1aIbI9Q0z8wDt-1hZI0oob0yp5ZfUUQvS9K-dLS6wHP1Vgjs1XlEOIDTuIWBNPMM-GCA4__0HvKIEMgcfPEHZ4S62Bt1R_4YsNq4l46b9N07uHCs9qeTO64mcx6k74zGbrlvARI1GxeBBAgFM_iG9mpAsH1YZGKSnCPgwjTwAfGowwlON_J5Bd8Jz5FHkRJEgYBPgA',\n
+          \ 1,\n  'grafana','/d/_IOiw2TWz/cluster-status-taco?orgId=1&refresh=10s',\n
+          \ 'grafana','/d/Us97AHbWz/pod-status-taco?orgId=1&refresh=10s',\n  'grafana','/app/canvas#/workpad/workpad-57011c4b-16e5-4167-967a-8b3046547f8d/page/1?__fullscreen=true',\n
+          \ 'grafana','/app/canvas#/workpad/workpad-57011c4b-16e5-4167-967a-8b3046547f8d/page/1?__fullscreen=true',
+          \n  'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM1ekNDQWMrZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJd01URXlNakExTWpJME1Wb1hEVE13TVRFeU1EQTFNakkwTVZvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBSzg5CjBxRkd3M21uVUNQaTNsQVRybkFXODVLelJ0YUtER0xwWm50enN6dk9rNUhHZ3NlK1VtdlBLRUhBYlFLVzhlOWYKWlFWbG1vcHllSk1OVHY4Skh5VEYrR25JbVJhVVB5U21aK2E4MFpKOWhhbllocitqdkJ6VDIzbWt0NkFvTTJBbApOYjh6S0szRWdVSlB5SEkyb3ZGZVV3dXI5dUZaMEtsVThPak5CMXB1clFxaG1vd3pseDNoUHJIcUVNckl3ZFpFCmZKRHhTNVV4YmVZMThHRFpaT3RFeXI1R0xxVTNFSkpkWmNtYzFrWWZjQmtldUQ1Z2dDNFc1a21SdmJmYlB0V1IKUVFDd3R6UGQwNkd4WG1jNzBFNHBqb0gvRkkrYWoySU5hdVBRUzlPdStjb2VrZ3lZUk81UmgrQjhUNXNqbDYyZwptdVR5NVFyYXdZVVdsZHhjRHdzQ0F3RUFBYU5DTUVBd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0hRWURWUjBPQkJZRUZOM0NoNVVNSUtnTnJFNnpueCtJNWVrRm5iMHlNQTBHQ1NxR1NJYjMKRFFFQkN3VUFBNElCQVFDTC9MRGIvZWFmVmI4VlM0R3hadmlQalQ5NThIdlVGdlVjQ3E0d29rZWxXWURvQXdFRgo3NjZBRTZlTzZ6eCsxUnpZNTR4bCtsSEcyRWN4WUYwb2V4TTVjc212bTQzaE85YnRqeWVVdTYwa3Z0ekpWdFRyClhnVW8wK29IeDhIbmEwMzRxVHNZOTVMbDBTQm1GbmdIUFI3TVRpUytUb3JUQUt3L2JqVFVmSUI4YlN6N2FKbHcKYmViVU5Lc004b1VHdytzdkdsOXlBOUtQaWpCaTZsSDUzWXNzc2QzVFFQVXd4bzM1aVVHR3g2aEpQWUYyYXJqdAprWlQ3dTJwYWRCbHBrOEdDdk9WYk9BVlJWTDAxOGl1YlllN0lGclBjL1ViUnZNMklvazY5R3kzT2tpeHU5RkVaCnVkUWVoTEJlZTVqUzJuMngyQTV1TlhETFRGcXAyK0IzRHp6OQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==',\n
+          \ 'http://localhost:8080');\nINSERT INTO \"cluster_menu\" VALUES ('siim-dev',1,0,'TACO-Dashboard',1,NULL,NULL,NULL,1);\nINSERT
+          INTO \"cluster_menu\" VALUES ('siim-dev',2,1,'Cluster Status',2,'/d/taco-kubernetes-cluster/1-kubernetes-cluster-status?orgId=1&var-datasource=Prometheus&var-taco_cluster=siim-dev','grafana','embedded',1);\nINSERT
+          INTO \"cluster_menu\" VALUES ('siim-dev',3,1,'ETCD Status',3,'/d/taco-etcdcluster/1-1-etcd-cluster-status?orgId=1&refresh=10s&var-datasource=Prometheus&var-taco_cluster=siim-dev','grafana','embedded',1);\nINSERT
+          INTO \"cluster_menu\" VALUES ('siim-dev',4,1,'Pod Status',4,'/d/taco-kubernetes-pods/2-kubernetes-pod-status?orgId=1&refresh=10s&var-taco_cluster=siim-dev&var-namespace=All&var-pod=All&var-container=All','grafana','embedded',1);\nINSERT
+          INTO \"cluster_menu\" VALUES ('siim-dev',5,1,'Node Status',5,'/d/taco-nodestatus/3-node-status?orgId=1&var-taco_cluster=siim-dev','grafana','embedded',1);\nINSERT
+          INTO \"cluster_menu\" VALUES ('siim-dev',6,1,'Node Network',6,'/d/l1jN0FAZz/node-network-detail-taco?orgId=1&var-taco_cluster=siim-dev','grafana','embedded',1);\nINSERT
+          INTO \"cluster_menu\" VALUES ('siim-dev',7,1,'Calico Status',7,'/d/pF9vmrTWz/calico?orgId=1&var-taco_cluster=siim-dev','grafana','embedded',1);\nINSERT
+          INTO \"cluster_menu\" VALUES ('siim-dev',8,1,'Trident Stats',8,'/d/BecaULSGz/trident-copy?orgId=1&refresh=30s&var-taco_cluster=All','grafana','embedded',1);\nINSERT
+          INTO \"cluster_menu\" VALUES ('siim-dev',9,0,'Discovery',9,NULL,NULL,NULL,1);\nINSERT
+          INTO \"cluster_menu\" VALUES ('siim-dev',10,9,'All Logs',10,'/app/kibana/discover','kibana_dash','embedded',1);\nINSERT
+          INTO \"cluster_menu\" VALUES ('siim-dev',11,9,'Kubernetes Events ',11,'/app/kibana/discover?_g=()&_a=(columns:!(_source),index:''8c7bd930-e0e9-11ea-a551-672ccd916a2f'',interval:auto,query:(language:kuery,query:''''),sort:!(!(eventTime,desc)))','kibana_dash','embedded',1);\nINSERT
+          INTO \"cluster_menu\" VALUES ('siim-dev',12,9,'ETCD Logs ',12,'/app/kibana/discover?_g=()&_a=(columns:!(_source),index:''9a4c60c0-e0e9-11ea-a551-672ccd916a2f'',interval:auto,query:(language:kuery,query:''''),sort:!(!(''@timestamp'',desc)))','kibana_dash','embedded',1);\nINSERT
+          INTO \"cluster_menu\" VALUES ('siim-dev',13,9,'Trident Logs ',13,'/app/kibana/discover?_g=(filters:!())&_a=(columns:!(_source),filters:!((''$state'':(store:appState),meta:(alias:!n,disabled:!f,index:''5ccc0de0-e0e9-11ea-a551-672ccd916a2f'',key:kubernetes.pod_name,negate:!f,params:(query:''trident*''),type:phrase),query:(match:(kubernetes.pod_name:(query:''trident*'',type:phrase))))),index:''5ccc0de0-e0e9-11ea-a551-672ccd916a2f'',interval:auto,query:(language:kuery,query:''''),sort:!(!(''@timestamp'',desc)))','kibana_dash','embedded',1);\nINSERT
+          INTO \"cluster_menu\" VALUES ('siim-dev',14,9,'F5 Bigip Ctrl',14,'/app/kibana/discover?_g=(filters:!())&_a=(columns:!(_source),filters:!((''$state'':(store:appState),meta:(alias:!n,disabled:!f,index:''5ccc0de0-e0e9-11ea-a551-672ccd916a2f'',key:kubernetes.pod_name,negate:!f,params:(query:''k8s-bigip1*''),type:phrase),query:(match:(kubernetes.pod_name:(query:''k8s-bigip1*'',type:phrase))))),index:''5ccc0de0-e0e9-11ea-a551-672ccd916a2f'',interval:auto,query:(language:kuery,query:bigip),sort:!(!(''@timestamp'',desc)))','kibana_dash','embedded',1);\nINSERT
+          INTO \"cluster_menu\" VALUES ('siim-dev',15,0,'Control ',15,'/EmptyLink','adminConsole','embedded',1);\nINSERT
+          INTO \"main_menu\" VALUES ('siim-dev','Y','N','N','N');"
+      filter:
+        rule: "yes"
+      grafana:
+        authkey: admin:password
+      initDB: true
+      keycloak:
+        cacert: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURSekNDQWkrZ0F3SUJBZ0lKQU41dFhpR1gvR0dqTUEwR0NTcUdTSWIzRFFFQkN3VUFNRG94Q3pBSkJnTlYKQkFvTUFrbFVNU3N3S1FZRFZRUUREQ0pyWlhsamJHOWhheTV6YTJJdFpHOXFMV1JsZGpBeExtSjBkbkJoWVhNdQpZMjl0TUI0WERUSXdNRGN3TXpFd01UVXlPRm9YRFRNd01EY3dNVEV3TVRVeU9Gb3dPakVMTUFrR0ExVUVDZ3dDClNWUXhLekFwQmdOVkJBTU1JbXRsZVdOc2IyRnJMbk5yWWkxa2Iyb3RaR1YyTURFdVluUjJjR0ZoY3k1amIyMHcKZ2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRQzI3bGkzTEpQVEY2cm1yOU15Q0Y3SgpGQkIyZkwzYVYxbU9TUVJPckovb25FUzBtd25uZUFKYkw2Q044SVlZVlZ3QXZYWmlwY0RKa1ZTNVgySUNlajI0CmJlUUFPcGxwOFFKaXZYMmJpelp3QU9JTGcxdFFBTkhHY1VsQXVRZzBmYmhYYWhZcGllbDJqc3BERFNoWXJNYUQKR1haTS9YdnkyL0R6M29VNHJqeFZUckZhdW1mZFhTTjdpSGp3REJtd3d5dVZaWThzWHlURGdCS2Yxd0pQcVFzdgpUSlIvb0ZRTm8zbDNhSlBWUDEwd2JSMkJRc3NFSTQ4K203bFhRUkZpRzFtbFFoOFYvNXg3YnlyZjlscmtkeDRlClRmRnMvd3cyUWhHUTJQcExkSDVDdTJTcnI5aDVkMG1tZG9YL083aDgvRm1iNitkMXhWMDNkWGJIRXpsdlFFcGQKQWdNQkFBR2pVREJPTUIwR0ExVWREZ1FXQkJTU1d0YjJCc2lxbGtwVlV4c09hcSs0WGpxM3pEQWZCZ05WSFNNRQpHREFXZ0JTU1d0YjJCc2lxbGtwVlV4c09hcSs0WGpxM3pEQU1CZ05WSFJNRUJUQURBUUgvTUEwR0NTcUdTSWIzCkRRRUJDd1VBQTRJQkFRQlVLa2FlRjJlUHIwaG0ycmxrTnhoWCs0cFpGeHB1cmV3L042MmVVN1NDOHFRK1ZiUjIKM0F6M0c5bnozMnM2YTZkalYzUmdsSjk1dkxiRlhONk5kNHpOTWpsRkFDNjdJdFBLODBHc1ZQbVkxRUYzdlRsSQpKcmMyck4zeUNjRjAyQ3NwMUhIVFlNa3ptNndXeUtUVzE0dDlMY0JxUVJiZytSMURKTW5iNXJZdCtoS0Rlc2ltCkROb0tKVWlybCtDSnNqS2xOYVg3UjZYdXNoOHRLRWRSdUVKZ1lkM2d3dms3ejJuS2hyMGQxQUI5Y2VCcldNckIKVW9qMmZMMGdUQkl4dWJBdmhMcThWdjNlTzNRZ0ZkeEVSSWQrMWpzaExEQ1IwUzM3dHhnbUE2OEc0YldEdnpSYQpEQ2syb1E5eDF1Z0xNVGQvUGpLSmZzNlpzbHA5SFVTSGpEYlgKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+        clientId: cloud-console
+        enabled: "yes"
+        hasRealmRole1: lma_system
+        hasRealmRole2: lma_app
+        hasRealmRole3: lma_viewer
+        realm: siim
+        url: http://192.168.5.61:32080/auth
+      kibana:
+        authkey: elastic:tacoword
+      lenz:
+        url: http://localhost:8080
+      loggingfilter:
+        url: /apis/logging.kubesphere.io/v1alpha2/namespaces/lma/filters/kubernetes
+      password: password
+      prometheus:
+        ruleUrl: /apis/monitoring.coreos.com/v1/namespaces/fed/prometheusrules
+      service:
+        proxyportlist: 32001-32008
+        proxyurl:
+          format: '%REQUEST_HOST%:%REQUEST_PORT%'
+      username: taco
+    image:
+      pullPolicy: Always
+      repository: siim/taco-cloudconsole
+      tag: 200721
+    ingress:
+      enabled: false
+    nodeSelector:
+      taco-lma: enabled
+    service:
+      nodePort: 32000
+      port: 32000
+      proxy_from: 32001
+      proxy_to: 32008
+      separateAll: false
+      targetPort: 32000
+      type: NodePort
+    volume:
+      accessModes: ReadWriteOnce
+      storageClassName: rbd
+  wait: true
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  labels:
+    name: keycloak
+  name: keycloak
+spec:
+  chart:
+    name: keycloak
+    repository: https://codecentric.github.io/helm-charts
+    version: 8.2.2
+  releaseName: keycloak
+  targetNamespace: fed
+  values:
+    clusterDomain: siim-dev
+    global:
+      storageClass: rbd
+    keycloak:
+      extraEnv: |
+        - name: KEYCLOAK_LOGLEVEL
+          value: WARN
+        - name: WILDFLY_LOGLEVEL
+          value: WARN
+      ingress:
+        enabled: false
+        hosts: []
+        tls: []
+      password: password
+      persistence:
+        dbPassword: password
+        dbUser: keycloak
+        dbVendor: postgres
+        deployPostgres: true
+      service:
+        httpNodePort: 32080
+        httpPort: 80
+        httpsNodePort: ""
+        httpsPort: 8443
+        jgroupsPort: 7600
+        type: NodePort
+    postgresql:
+      persistence:
+        enabled: false
+        size: 5Gi
+        storageClass: rbd
+      postgresqlDatabase: keycloak
+      postgresqlPassword: password
+      postgresqlPostgresPassword: password
+      postgresqlUsername: keycloak
+  wait: true

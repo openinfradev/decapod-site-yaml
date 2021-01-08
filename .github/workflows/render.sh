@@ -1,5 +1,6 @@
 #!/bin/bash
 DECAPOD_BASE_URL=https://github.com/openinfradev/decapod-base-yaml.git
+DECAPOD_BASE_DIR=decapod-base-yaml
 BRANCH="main"
 
 if [ $# -eq 0 ]; then
@@ -12,8 +13,11 @@ if [ $# -eq 2 ]; then
   BRANCH=$2
 fi
 
-echo "Fetch base with $BRANCH branch/tag........"
-git clone -b $BRANCH $DECAPOD_BASE_URL
+if [ -f $DECAPOD_BASE_DIR ]; then
+  echo "Fetch base with $BRANCH branch/tag........"
+  git clone -b $BRANCH $DECAPOD_BASE_URL
+fi
+
 if [ $? -ne 0 ]; then
   exit $?
 fi
@@ -48,4 +52,4 @@ do
 done
 
 rm -rf $APP_NAME/base
-rm -rf decapod-base-yaml
+rm -rf $DECAPOD_BASE_DIR

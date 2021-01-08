@@ -1,0 +1,119 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  labels:
+    name: cloud-console
+  name: cloud-console
+spec:
+  chart:
+    name: cloud-console
+    repository: https://openinfradev.github.io/hanu-helm-repo
+    version: 1.0.0
+  releaseName: cloud-console
+  targetNamespace: fed
+  values:
+    config:
+      extra:
+        config: ""
+        sql: ""
+      filter:
+        rule: "yes"
+      grafana:
+        authkey: admin:password
+      initDB: true
+      keycloak:
+        cacert: TO_BE_FIXED
+        clientId: cloud-console
+        enabled: "yes"
+        hasRealmRole1: lma_system
+        hasRealmRole2: lma_app
+        hasRealmRole3: lma_viewer
+        realm: hanu
+        url: https://keycloak.hanu.io/auth
+      kibana:
+        authkey: elastic:tacoword
+      lenz:
+        url: http://lenz.hanu.io
+      loggingfilter:
+        url: /apis/logging.kubesphere.io/v1alpha2/namespaces/lma/filters/kubernetes
+      password: password
+      prometheus:
+        ruleUrl: /apis/monitoring.coreos.com/v1/namespaces/fed/prometheusrules
+      service:
+        proxyportlist: 32001-32008
+        proxyurl:
+          format: http://proxy-%REQUEST_PORT%.hanu.io
+      username: taco
+    ingress:
+      enabled: false
+    nodeSelector:
+      taco-lma: enabled
+    service:
+      nodePort: 32000
+      port: 32000
+      proxy_from: 32001
+      proxy_to: 32008
+      targetPort: 32000
+      type: ClusterIP
+    volume:
+      accessModes: ReadWriteOnce
+      storageClassName: ceph
+  wait: true
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  labels:
+    name: keycloak
+  name: keycloak
+spec:
+  chart:
+    name: keycloak
+    repository: https://codecentric.github.io/helm-charts
+    version: 8.2.2
+  releaseName: keycloak
+  targetNamespace: fed
+  values:
+    clusterDomain: cluster.local
+    global:
+      storageClass: ceph
+    keycloak:
+      extraEnv: |
+        - name: KEYCLOAK_LOGLEVEL
+          value: WARN
+        - name: WILDFLY_LOGLEVEL
+          value: WARN
+      ingress:
+        enabled: false
+        hosts: []
+        tls: []
+      password: password
+      persistence:
+        dbPassword: password
+        dbUser: keycloak
+        dbVendor: postgres
+        deployPostgres: true
+      service:
+        httpNodePort: 32080
+        httpPort: 80
+        httpsNodePort: ""
+        httpsPort: 8443
+        jgroupsPort: 7600
+        type: ClusterIP
+    password: password
+    persistence:
+      dbPassword: password
+      dbUser: keycloak
+    postgresql:
+      persistence:
+        enabled: false
+        size: 5Gi
+        storageClass: ceph
+        storageClassName: ceph
+      postgresqlDatabase: keycloak
+      postgresqlPassword: password
+      postgresqlPostgresPassword: password
+      postgresqlUsername: keycloak
+    service:
+      type: ClusterIP
+  wait: true
