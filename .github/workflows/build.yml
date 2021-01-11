@@ -8,7 +8,6 @@ on:
   pull_request:
     branches:
       - 'main'
-      - '*:main'
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -38,3 +37,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Trigger jenkins job
+        uses: jabbukka/jenkins-trigger@main
+        with:
+          url: ${{ secrets.JENKINS_URL }}
+          job_name: "hanu-deploy-apps"
+          user_name: ${{ secrets.JENKINS_USER }}
+          api_token: ${{ secrets.JENKINS_TOKEN }}
+          wait: "true"
+          timeout: "3600"
