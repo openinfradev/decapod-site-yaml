@@ -461,7 +461,7 @@ metadata:
 spec:
   chart:
     name: grafana
-    repository: https://openinfradev.github.io/hanu-helm-repo/
+    repository: https://grafana.github.io/helm-charts
     version: 5.5.7
   helmVersion: v3
   releaseName: grafana
@@ -502,8 +502,8 @@ metadata:
 spec:
   chart:
     name: kube-state-metrics
-    repository: https://openinfradev.github.io/hanu-helm-repo/
-    version: 2.9.4
+    repository: https://charts.bitnami.com/bitnami
+    version: 1.1.3
   helmVersion: v3
   releaseName: kube-state-metrics
   targetNamespace: lma
@@ -551,7 +551,7 @@ metadata:
 spec:
   chart:
     name: prometheus-operator
-    repository: https://openinfradev.github.io/hanu-helm-repo/
+    repository: https://prometheus-community.github.io/helm-charts
     version: 9.3.2
   helmVersion: v3
   releaseName: prometheus
@@ -654,7 +654,7 @@ metadata:
 spec:
   chart:
     name: prometheus-adapter
-    repository: https://openinfradev.github.io/hanu-helm-repo/
+    repository: https://prometheus-community.github.io/helm-charts
     version: 2.5.1
   helmVersion: v3
   releaseName: prometheus-adapter
@@ -678,7 +678,7 @@ metadata:
 spec:
   chart:
     name: prometheus-operator
-    repository: https://openinfradev.github.io/hanu-helm-repo/
+    repository: https://prometheus-community.github.io/helm-charts
     version: 9.3.2
   helmVersion: v3
   releaseName: prometheus-fed-master
@@ -818,7 +818,7 @@ metadata:
 spec:
   chart:
     name: prometheus-node-exporter
-    repository: https://openinfradev.github.io/hanu-helm-repo/
+    repository: https://prometheus-community.github.io/helm-charts
     version: 1.11.2
   helmVersion: v3
   releaseName: prometheus-node-exporter
@@ -837,7 +837,7 @@ metadata:
 spec:
   chart:
     name: prometheus-operator
-    repository: https://openinfradev.github.io/hanu-helm-repo/
+    repository: https://prometheus-community.github.io/helm-charts
     version: 9.3.2
   helmVersion: v3
   releaseName: prometheus-operator
@@ -928,8 +928,8 @@ metadata:
 spec:
   chart:
     name: prometheus-pushgateway
-    repository: https://openinfradev.github.io/hanu-helm-repo/
-    version: 1.4.3
+    repository: https://prometheus-community.github.io/helm-charts
+    version: 1.5.1
   helmVersion: v3
   releaseName: prometheus-pushgateway
   targetNamespace: lma
@@ -950,7 +950,7 @@ metadata:
 spec:
   chart:
     name: taco-watcher
-    repository: TO_BE_FIXED
+    repository: https://openinfradev.github.io/hanu-helm-repo
     version: 0.1.0
   helmVersion: v3
   releaseName: taco-watcher

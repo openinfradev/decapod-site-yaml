@@ -19,7 +19,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Start to build for $APP_NAME"
-cp -r decapod-yaml/$APP_NAME/base $APP_NAME/
+cp -r decapod-base-yaml/$APP_NAME/base $APP_NAME/
 for i in `ls ${APP_NAME}/site`
 do
 
@@ -29,14 +29,13 @@ do
    mkdir -p $APP_NAME/output/$i/
 
    echo "[$i] Rendering $APP_NAME-manifest.yaml for $i site"
-   docker run -i -v $(pwd)/$APP_NAME:/$APP_NAME --name kustomize-build-$APP_NAME sktdev/decapod-kustomize:latest kustomize build --enable_alpha_plugins /$APP_NAME/site/$i -o /$APP_NAME/output/$i/$APP_NAME-manifest.yaml
+   docker run --rm -i -v $(pwd)/$APP_NAME:/$APP_NAME --name kustomize-build-$APP_NAME sktdev/decapod-kustomize:latest kustomize build --enable_alpha_plugins /$APP_NAME/site/$i -o /$APP_NAME/output/$i/$APP_NAME-manifest.yaml
    build_result=$?
 
    if [ $build_result != 0 ]; then
      exit $build_result
    fi
 
-   docker ps -a | grep kustomize-build-$APP_NAME | awk '{print $1}' | xargs docker rm -f
    if [ -f "$OUTPUT_PATH" ]; then
      echo "[$i] Successfully Completed!"
    else
