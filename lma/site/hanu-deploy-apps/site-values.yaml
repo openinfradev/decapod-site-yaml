@@ -6,7 +6,7 @@ metadata:
 global:
   nodeSelector:
     taco-lma: enabled
-  clusterName: cluster.local
+  clusterName: prd-ahnsk.cluster
   storageClassName: rbd
   repository: https://openinfradev.github.io/hanu-helm-repo/
   serviceScrapeInterval: 30s
