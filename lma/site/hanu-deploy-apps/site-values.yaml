@@ -129,6 +129,7 @@ charts:
       interval: $(serviceScrapeInterval)
     serviceMonitor.kubelet.interval: 30s
     serviceMonitor.additionalScrapeConfigs:
+    serviceMonitor.ceph.enabled: true
 
 - name: fed-addons
   override:
