@@ -130,6 +130,10 @@ charts:
     serviceMonitor.kubelet.interval: 30s
     serviceMonitor.additionalScrapeConfigs:
     serviceMonitor.ceph.enabled: true
+      serviceMonitor.ceph.mon_hosts:
+      - ip: 192.168.97.126
+      - ip: 192.168.97.99
+      - ip: 192.168.97.29
 
 - name: fed-addons
   override:
