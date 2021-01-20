@@ -22,6 +22,7 @@ charts:
 
 - name: prometheus
   override:
+    kubeDns.enabled: false
     kubeEtcd.endpoints:
     - 192.168.97.209
     - 192.168.97.163
