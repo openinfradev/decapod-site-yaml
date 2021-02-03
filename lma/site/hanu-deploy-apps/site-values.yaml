@@ -13,8 +13,6 @@ global:
 
 charts:
 - name: prometheus-operator
-  source:
-    repository: $(repository)
   override:
     prometheusOperator.nodeSelector: $(nodeSelector)
 
@@ -23,8 +21,6 @@ charts:
     repository: $(repository)
 
 - name: prometheus
-  source:
-    repository: $(repository)
   override:
     kubeEtcd.endpoints:
     - 172.27.1.222
@@ -35,8 +31,6 @@ charts:
     prometheus.prometheusSpec.nodeSelector: $(nodeSelector)
     
 - name: prometheus-fed-master
-  source:
-    repository: $(repository)  
   override:
     alertmanager.alertmanagerSpec.nodeSelector: $(nodeSelector)
     alertmanager.alertmanagerSpec.retention: 2h
@@ -45,19 +39,11 @@ charts:
     prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName: $(storageClassName)
     prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: 20Gi
   
-- name: prometheus-node-exporter
-  source:
-    repository: $(repository)
-
 - name: kube-state-metrics
-  source:
-    repository: $(repository)
   override:
     nodeSelector: $(nodeSelector)
 
 - name: prometheus-pushgateway
-  source:
-    repository: $(repository)
   override:
     nodeSelector: $(nodeSelector)
 
@@ -90,8 +76,6 @@ charts:
     customResource.elasticsearch.nodeSets.client.enabled: false
 
 - name: grafana
-  source:
-    repository: $(repository)
   override:
     adminPassword: password
     persistence.storageClassName: $(storageClassName)
@@ -164,8 +148,6 @@ charts:
     kibanaInit.url: http://taco-kibana-dashboard-kb-http.lma.svc.$(clusterName):5601
 
 - name: prometheus-adapter
-  source:
-    repository: $(repository)
   override:
     nodeSelector: $(nodeSelector)
 
