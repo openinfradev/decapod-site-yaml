@@ -33,7 +33,7 @@ jobs:
         uses: jabbukka/jenkins-trigger@main
         with:
           url: ${{ secrets.JENKINS_URL }}
-          job_name: "hanu-deploy-apps"
+          job_name: "deploy-apps"
           user_name: ${{ secrets.JENKINS_USER }}
           api_token: ${{ secrets.JENKINS_TOKEN }}
           wait: "true"
