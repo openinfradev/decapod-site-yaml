@@ -3,7 +3,7 @@
 pipeline {
   agent {
     node {
-      label 'openstack-slave'
+      label 'openstack-slave-pangyo'
       customWorkspace "workspace/${env.JOB_NAME}/${env.BUILD_NUMBER}"
     }
   }
@@ -24,13 +24,14 @@ pipeline {
       steps {
         script {
           sh """
-            mc cp hanu-minio/openstack/clouds.yaml .
+            git clone https://github.com/openinfradev/taco-gate-inventories.git
+            cp taco-gate-inventories/config/pangyo-clouds.yml ./clouds.yaml
           """
 
           vmName = getK8sVmName("k8s_endpoint")
           nameKey=vmName[0]
           vmNamePrefix = vmName[1]
-          vmIPs = getOpenstackVMinfo(vmNamePrefix, 'private-mgmt-online', 'hanu-prod')
+          vmIPs = getOpenstackVMinfo(vmNamePrefix, 'private-mgmt-online', 'openstack-pangyo')
           ceph_mon_host=""
 
           nodeCount = 0
@@ -56,12 +57,12 @@ pipeline {
             def cephNodes = [nodeIps[0], nodeIps[1], nodeIps[2]]
             ceph_mon_host=cephNodes.join(',')
           }
-          BRANCH_NAME = "hanu-deploy-apps-${env.BUILD_NUMBER}"
+          BRANCH_NAME = "jenkins-deploy-${env.BUILD_NUMBER}"
           sh """
-            git clone https://github.com/openinfradev/hanu-site-yaml.git
-            cd hanu-site-yaml && git checkout -b $BRANCH_NAME
+            git clone https://github.com/openinfradev/decapod-site-yaml.git
+            cd decapod-site-yaml && git checkout -b $BRANCH_NAME
 
-            sed -i 's/TACO_MON_HOST/ceph_mon_host/g' openstack/output/${env.JOB_NAME}/*-manifest.yaml
+            sed -i 's/TACO_MON_HOST/ceph_mon_host/g' openstack/site/hanu-jenkins/*-manifest.yaml
             git status
             git commit -a -m "replace TACO_XXX variables" --author="Esther Kim <jabbukka@naver.com>"
             git push origin $BRANCH_NAME
@@ -79,7 +80,7 @@ pipeline {
             git clone https://github.com/openinfradev/taco-gate-inventories.git
             scp -o StrictHostKeyChecking=no -i jenkins.key -r taco-gate-inventories/workflows/* taco-gate-inventories/scripts/deployApps.sh taco@$ADMIN_NODE_IP:/home/taco/
             ssh -o StrictHostKeyChecking=no -i jenkins.key taco@$ADMIN_NODE_IP chmod 0755 /home/taco/deployApps.sh
-            ssh -o StrictHostKeyChecking=no -i jenkins.key taco@$ADMIN_NODE_IP /home/taco/deployApps.sh --apps ${params.DEPLOY_APPS} --site hanu-deploy-apps --branch $BRANCH_NAME
+            ssh -o StrictHostKeyChecking=no -i jenkins.key taco@$ADMIN_NODE_IP /home/taco/deployApps.sh --apps ${params.DEPLOY_APPS} --site hanu-jenkins --branch $BRANCH_NAME
           """
         }
       }
@@ -97,7 +98,7 @@ pipeline {
     success {
       script {
         if ( params.CLEANUP == true ) {
-          deleteOpenstackVMs(vmNamePrefix, nameKey, 'hanu-prod')
+          deleteOpenstackVMs(vmNamePrefix, nameKey, 'openstack-pangyo')
         } else {
           echo "Skipping VM cleanup.."
         }
