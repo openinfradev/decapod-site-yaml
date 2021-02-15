@@ -64,7 +64,7 @@ pipeline {
             git clone https://github.com/openinfradev/decapod-site-yaml.git
             cd decapod-site-yaml && git checkout -b $BRANCH_NAME
 
-            #sed -i 's/TACO_MON_HOST/ceph_mon_host/g' openstack/site/hanu-jenkins/*-manifest.yaml
+            #sed -i 's/TACO_MON_HOST/ceph_mon_host/g' openstack/site/hanu-deploy-apps/*-manifest.yaml
             #git status
             #git commit -a -m "replace TACO_XXX variables" --author="Esther Kim <jabbukka@naver.com>"
             git push origin $BRANCH_NAME
@@ -81,7 +81,7 @@ pipeline {
             cp /opt/jenkins/.ssh/jenkins-slave-hanukey ./jenkins.key
             scp -o StrictHostKeyChecking=no -i jenkins.key -r taco-gate-inventories/workflows/* taco-gate-inventories/scripts/deployApps.sh taco@$ADMIN_NODE_IP:/home/taco/
             ssh -o StrictHostKeyChecking=no -i jenkins.key taco@$ADMIN_NODE_IP chmod 0755 /home/taco/deployApps.sh
-            ssh -o StrictHostKeyChecking=no -i jenkins.key taco@$ADMIN_NODE_IP /home/taco/deployApps.sh --apps ${params.DEPLOY_APPS} --site hanu-jenkins --branch $BRANCH_NAME
+            ssh -o StrictHostKeyChecking=no -i jenkins.key taco@$ADMIN_NODE_IP /home/taco/deployApps.sh --apps ${params.DEPLOY_APPS} --site hanu-deploy-apps --branch $BRANCH_NAME
           """
         }
       }
