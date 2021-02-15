@@ -15,7 +15,7 @@ charts:
   override:
     prometheusOperator.nodeSelector: $(nodeSelector)
 
-- name: elasticsearch-operator  
+- name: eck-operator
 
 - name: prometheus  
   override:
@@ -95,7 +95,7 @@ charts:
   override:
     conf.processes: dockerd,kubelet,kube-proxy,ntpd,node
 
-- name: elasticsearch-kibana  
+- name: eck-resource 
   override:
     customResource.kibana.nodeSelector: $(nodeSelector)
     

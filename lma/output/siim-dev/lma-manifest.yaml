@@ -8,7 +8,7 @@ spec:
   chart:
     name: lma-addons
     repository: https://openinfradev.github.io/hanu-helm-repo
-    version: 1.0.6
+    version: 1.0.7
   helmVersion: v3
   releaseName: addons
   targetNamespace: lma
@@ -60,24 +60,42 @@ apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
   labels:
-    name: elasticsearch-kibana
-  name: elasticsearch-kibana
+    name: eck-operator
+  name: eck-operator
 spec:
   chart:
-    name: elasticsearch-operator
-    repository: https://openinfradev.github.io/hanu-helm-repo
-    version: 1.0.3
+    name: eck-operator
+    repository: https://helm.elastic.co
+    version: 1.3.1
   helmVersion: v3
-  releaseName: elasticsearch-kibana
+  releaseName: eck-operator
+  targetNamespace: elastic-system
+  values:
+    config:
+      containerRegistry: docker.elastic.co
+    installCRDs: true
+    replicaCount: 1
+  wait: true
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  labels:
+    name: eck-resource
+  name: eck-resource
+spec:
+  chart:
+    name: eck-resource
+    repository: https://openinfradev.github.io/hanu-helm-repo
+    version: 1.0.0
+  helmVersion: v3
+  releaseName: eck-resource
   targetNamespace: lma
   values:
     customResource:
       elasticsearch:
-        count: 3
-        enabled: true
         nodeSets:
           client:
-            count: 1
             enabled: true
             javaOpts: -Xms10g -Xmx10g
             limitCpu: 2
@@ -85,11 +103,8 @@ spec:
             nodeSelector:
               taco-lma: enabled
             pvc:
-              size: 0.5Gi
               storageClassName: rbd
           hotdata:
-            count: 3
-            enabled: true
             javaOpts: -Xms10g -Xmx10g
             limitCpu: 2
             limitMem: 20Gi
@@ -99,8 +114,6 @@ spec:
               size: 200Gi
               storageClassName: rbd
           master:
-            count: 3
-            enabled: true
             javaOpts: -Xms2g -Xmx2g
             limitCpu: 2
             limitMem: 4Gi
@@ -109,65 +122,78 @@ spec:
             pvc:
               size: 2Gi
               storageClassName: rbd
-          warmdata:
-            count: 2
-            enabled: false
-            javaOpts: -Xms2g -Xmx2g
-            limitCpu: 1
-            limitMem: 2Gi
-            nodeSelector:
-              taco-lma: enabled
-            pvc:
-              size: 200Gi
-              storageClassName: ceph
-        version: 7.5.1
       kibana:
-        enabled: true
-        http:
-          service:
-            spec:
-              ports:
-              - name: http
-                nodePort: 30001
-                port: 5601
-                targetPort: 5601
-              type: NodePort
-          tls:
-            selfSignedCertificate:
-              disabled: true
-        limitCpu: 4
-        limitMem: 8Gi
         nodeSelector:
           taco-lma: enabled
-        version: 7.5.1
-    elasticsearchOperator:
-      enabled: false
-  wait: true
----
-apiVersion: helm.fluxcd.io/v1
-kind: HelmRelease
-metadata:
-  labels:
-    name: elasticsearch-operator
-  name: elasticsearch-operator
-spec:
-  chart:
-    name: elasticsearch-operator
-    repository: https://openinfradev.github.io/hanu-helm-repo
-    version: 1.0.3
-  helmVersion: v3
-  releaseName: elasticsearch-operator
-  targetNamespace: elastic-system
-  values:
-    customResource:
-      elasticsearch:
-        enabled: false
-      kibana:
-        enabled: false
-    elasticsearchOperator:
-      createCustomResource: true
-      createNamespace: false
+    elasticsearch:
+      adminPassword: tacoword
+      count: 3
       enabled: true
+      nodeSets:
+        client:
+          count: 1
+          enabled: true
+          javaOpts: -Xms2g -Xmx2g
+          limitCpu: 2
+          limitMem: 4Gi
+          nodeSelector:
+            taco-lma: enabled
+          pvc:
+            size: 0.5Gi
+            storageClassName: ceph
+        hotdata:
+          count: 3
+          enabled: true
+          javaOpts: -Xms2g -Xmx2g
+          limitCpu: 2
+          limitMem: 4Gi
+          nodeSelector:
+            taco-lma: enabled
+          pvc:
+            size: 100Gi
+            storageClassName: ceph
+        master:
+          count: 3
+          enabled: true
+          javaOpts: -Xms2g -Xmx2g
+          limitCpu: 2
+          limitMem: 4Gi
+          nodeSelector:
+            taco-lma: enabled
+          pvc:
+            size: 2Gi
+            storageClassName: ceph
+        warmdata:
+          count: 2
+          enabled: false
+          javaOpts: -Xms2g -Xmx2g
+          limitCpu: 1
+          limitMem: 2Gi
+          nodeSelector:
+            taco-lma: enabled
+          pvc:
+            size: 200Gi
+            storageClassName: ceph
+      version: 7.5.1
+    kibana:
+      enabled: true
+      http:
+        service:
+          spec:
+            ports:
+            - name: http
+              nodePort: 30001
+              port: 5601
+              targetPort: 5601
+            type: NodePort
+        tls:
+          selfSignedCertificate:
+            disabled: true
+      limitCpu: 4
+      limitMem: 8Gi
+      nodeSelector:
+        taco-lma: enabled
+      version: 7.5.1
   wait: true
 ---
 apiVersion: helm.fluxcd.io/v1
@@ -180,7 +206,7 @@ spec:
   chart:
     name: lma-addons
     repository: https://openinfradev.github.io/hanu-helm-repo
-    version: 1.0.6
+    version: 1.0.7
   helmVersion: v3
   releaseName: fed-addons
   targetNamespace: fed
@@ -412,6 +438,9 @@ spec:
       base_cluster_url: siim-dev
       nodeSelector:
         taco-lma: enabled
+    image:
+      hyperkube:
+        tag: v1.17.6
     logExporter:
       enabled: false
   wait: true
@@ -449,6 +478,9 @@ spec:
           memory: 20Mi
     global:
       base_cluster_url: siim-dev
+    image:
+      hyperkube:
+        tag: v1.17.6
     logExporter:
       enabled: true
       nodeSelector:
@@ -556,9 +588,9 @@ metadata:
   name: prometheus
 spec:
   chart:
-    name: prometheus-operator
+    name: kube-prometheus-stack
     repository: https://prometheus-community.github.io/helm-charts
-    version: 9.3.2
+    version: 13.7.2
   helmVersion: v3
   releaseName: prometheus
   targetNamespace: lma
@@ -572,6 +604,9 @@ spec:
     defaultRules:
       create: false
     fullnameOverride: lma
+    global:
+      rbac:
+        create: false
     grafana:
       enabled: false
     kubeApiServer:
@@ -644,20 +679,20 @@ spec:
         thanos:
           version: v0.11.0
       service:
-        additionalPorts:
-        - name: grpc
-          nodePort: 30901
-          port: 10901
-          protocol: TCP
-          targetPort: grpc
         nodePort: 30008
+        type: NodePort
+      thanosService:
+        annotations: {}
+        enabled: false
+        labels: {}
+        nodePort: 30901
+        port: 10901
+        portName: grpc
+        targetPort: grpc
         type: NodePort
     prometheusOperator:
       admissionWebhooks:
         enabled: false
-      cleanupCustomResource: false
-      cleanupCustomResourceBeforeInstall: false
-      createCustomResource: false
       enabled: false
   wait: true
 ---
@@ -693,9 +728,9 @@ metadata:
   name: prometheus-fed-master
 spec:
   chart:
-    name: prometheus-operator
+    name: kube-prometheus-stack
     repository: https://prometheus-community.github.io/helm-charts
-    version: 9.3.2
+    version: 13.7.2
   helmVersion: v3
   releaseName: prometheus-fed-master
   targetNamespace: fed
@@ -779,6 +814,9 @@ spec:
     defaultRules:
       create: false
     fullnameOverride: fed-master
+    global:
+      rbac:
+        create: false
     grafana:
       enabled: false
     kubeApiServer:
@@ -829,9 +867,6 @@ spec:
     prometheusOperator:
       admissionWebhooks:
         enabled: false
-      cleanupCustomResource: false
-      cleanupCustomResourceBeforeInstall: false
-      createCustomResource: false
       enabled: false
   wait: true
 ---
@@ -862,9 +897,9 @@ metadata:
   name: prometheus-operator
 spec:
   chart:
-    name: prometheus-operator
+    name: kube-prometheus-stack
     repository: https://prometheus-community.github.io/helm-charts
-    version: 9.3.2
+    version: 13.7.2
   helmVersion: v3
   releaseName: prometheus-operator
   targetNamespace: lma
@@ -875,6 +910,9 @@ spec:
       enabled: false
     defaultRules:
       create: false
+    global:
+      rbac:
+        create: false
     grafana:
       enabled: false
     kubeApiServer:
@@ -882,6 +920,8 @@ spec:
     kubeControllerManager:
       enabled: false
     kubeDns:
+      enabled: false
+    kubeEtcd:
       enabled: false
     kubeProxy:
       enabled: false
@@ -1062,13 +1102,13 @@ spec:
       secretKey:
         password: password
       service:
-        nodePort: 30010
+        nodePort: 30002
         type: NodePort
     objstoreConfig: |-
       type: s3
       config:
         bucket: thanos
-        endpoint: {{ include "thanos.minio.fullname" . }}.monitoring.svc.siim-dev:9000
+        endpoint: {{ include "thanos.minio.fullname" . }}.fed.svc.cluster.local:9000
         access_key: taco
         secret_key: password
         insecure: true
