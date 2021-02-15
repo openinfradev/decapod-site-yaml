@@ -93,7 +93,7 @@ pipeline {
       script {
         sh """
           echo "Delete temporary branch"
-          cd hanu-site-yaml && git push origin :$BRANCH_NAME
+          cd decapod-site-yaml && git push origin :$BRANCH_NAME
         """
       }
     }
