@@ -29,7 +29,7 @@ pipeline {
           """
 
           vmNamePrefixRand = getK8sVmName("k8s_endpoint")
-          vmIPs = getOpenstackVMinfo(vmNamePrefixRand, networks.mgmt, params.PROVIDER)
+          vmIPs = getOpenstackVMinfo(vmNamePrefixRand, 'private-mgmt-online', 'openstack-pangyo')
           ceph_mon_host=""
 
           nodeCount = 0
