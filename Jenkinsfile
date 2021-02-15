@@ -28,21 +28,23 @@ pipeline {
             cp taco-gate-inventories/config/pangyo-clouds.yml ./clouds.yaml
           """
 
-          vmName = getK8sVmName("k8s_endpoint")
-          nameKey=vmName[0]
-          vmNamePrefix = vmName[1]
-          vmIPs = getOpenstackVMinfo(vmNamePrefix, 'private-mgmt-online', 'openstack-pangyo')
+          vmNamePrefixRand = getK8sVmName("k8s_endpoint")
+          vmIPs = getOpenstackVMinfo(vmNamePrefixRand, networks.mgmt, params.PROVIDER)
           ceph_mon_host=""
 
           nodeCount = 0
           def nodeIps = []
-          vmIPs.eachWithIndex { name, ip, index ->
-            nodeCount += 1
-            if (index==0) {
-              ADMIN_NODE_IP = ip
-              print("Found admin node IP: ${ADMIN_NODE_IP}")
+
+          // get API endpoints
+          if (vmIPs) {
+            vmIPs.eachWithIndex { name, ip, index ->
+              nodeCount += 1
+              if (index==0) {
+                ADMIN_NODE_IP = ip
+                print("Found admin node IP: ${ADMIN_NODE_IP}")
+              }
+              nodeIps[index] = ip
             }
-            nodeIps[index] = ip
           }
 
           if (nodeCount == 0) {
