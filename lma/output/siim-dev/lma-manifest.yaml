@@ -37,7 +37,7 @@ spec:
         interval: 10s
       kubelet:
         enabled: true
-        interval: 30s
+        interval: 10s
       nodeExporter:
         interval: 10s
       processExporter:
@@ -48,9 +48,6 @@ spec:
             application: process_exporter
             component: metrics
             release_group: prometheus-process-exporter
-      trident:
-        enabled: true
-        interval: 10s
     tacoWatcher:
       rbac:
         create: false
@@ -92,39 +89,6 @@ spec:
   releaseName: eck-resource
   targetNamespace: lma
   values:
-    customResource:
-      elasticsearch:
-        nodeSets:
-          client:
-            enabled: true
-            javaOpts: -Xms10g -Xmx10g
-            limitCpu: 2
-            limitMem: 20Gi
-            nodeSelector:
-              taco-lma: enabled
-            pvc:
-              storageClassName: rbd
-          hotdata:
-            javaOpts: -Xms10g -Xmx10g
-            limitCpu: 2
-            limitMem: 20Gi
-            nodeSelector:
-              taco-lma: enabled
-            pvc:
-              size: 200Gi
-              storageClassName: rbd
-          master:
-            javaOpts: -Xms2g -Xmx2g
-            limitCpu: 2
-            limitMem: 4Gi
-            nodeSelector:
-              taco-lma: enabled
-            pvc:
-              size: 2Gi
-              storageClassName: rbd
-      kibana:
-        nodeSelector:
-          taco-lma: enabled
     elasticsearch:
       adminPassword: tacoword
       count: 3
@@ -133,25 +97,25 @@ spec:
         client:
           count: 1
           enabled: true
-          javaOpts: -Xms2g -Xmx2g
+          javaOpts: -Xms10g -Xmx10g
           limitCpu: 2
-          limitMem: 4Gi
+          limitMem: 20Gi
           nodeSelector:
             taco-lma: enabled
           pvc:
             size: 0.5Gi
-            storageClassName: ceph
+            storageClassName: rbd
         hotdata:
           count: 3
           enabled: true
-          javaOpts: -Xms2g -Xmx2g
+          javaOpts: -Xms10g -Xmx10g
           limitCpu: 2
-          limitMem: 4Gi
+          limitMem: 20Gi
           nodeSelector:
             taco-lma: enabled
           pvc:
-            size: 100Gi
-            storageClassName: ceph
+            size: 200Gi
+            storageClassName: rbd
         master:
           count: 3
           enabled: true
@@ -162,7 +126,7 @@ spec:
             taco-lma: enabled
           pvc:
             size: 2Gi
-            storageClassName: ceph
+            storageClassName: rbd
         warmdata:
           count: 2
           enabled: false
@@ -218,16 +182,16 @@ spec:
           prometheusAddress: fed-master-prometheus:9090
     kibanaInit:
       enabled: true
-      url: http://taco-kibana-dashboard-kb-http.lma.svc.siim-dev:5601
+      url: http://eck-kibana-dashboard-kb-http.lma.svc.siim-dev:5601
     metricbeat:
       addtionalModules: []
       elasticsearch:
-        host: https://taco-elasticsearch-es-http.lma.svc.siim-dev:9200
+        host: https://eck-elasticsearch-es-http.lma.svc.siim-dev:9200
         password: tacoword
         username: elastic
       enabled: false
       kibana:
-        host: taco-kibana-dashboard-kb-http.lma.svc.siim-dev:5601
+        host: eck-kibana-dashboard-kb-http.lma.svc.siim-dev:5601
       prometheus:
         hosts:
         - fed-master-prometheus.fed.svc.siim-dev:9090
@@ -272,7 +236,7 @@ spec:
           grafanaUrl: http://grafana.fed.svc.siim-dev
           isMain: true
           k8sUrl: https://kubernetes.default.svc.siim-dev
-          kibanaUrl: http://taco-kibana-dashboard-kb-http.lma.svc.siim-dev:5601
+          kibanaUrl: http://eck-kibana-dashboard-kb-http.lma.svc.siim-dev:5601
           menu:
             enabled: true
         enabled: false
@@ -292,7 +256,7 @@ spec:
     name: fluentbit-operator
     repository: https://openinfradev.github.io/hanu-helm-repo
     skipDepUpdate: true
-    version: 1.0.9
+    version: 1.0.10
   helmVersion: v3
   releaseName: fluentbit
   targetNamespace: lma
@@ -390,7 +354,7 @@ spec:
               number_of_shards: 2
               refresh_interval: 30s
           name: syslog
-        url: https://taco-elasticsearch-es-http.lma.svc.siim-dev:9200
+        url: https://eck-elasticsearch-es-http.lma.svc.siim-dev:9200
         username: elastic
       exclude:
       - key: $kubernetes['container_name']
@@ -400,7 +364,7 @@ spec:
       outputs:
         es:
           enabled: true
-          host: taco-elasticsearch-es-http.lma.svc.siim-dev
+          host: eck-elasticsearch-es-http.lma.svc.siim-dev
           password: dGFjb3dvcmQ=
           port: 9200
           username: ZWxhc3RpYw==
@@ -430,6 +394,12 @@ spec:
         path: /var/log/messages
         tag: syslog.*
         type: syslog
+      - index: syslog
+        name: syslog-ubuntu
+        parser: syslog-rfc5424
+        path: /var/log/syslog
+        tag: syslog.*
+        type: syslog
     fluentbitOperator:
       cleanupCustomResource: false
       createCustomResource: false
@@ -456,7 +426,7 @@ spec:
     name: fluentbit-operator
     repository: https://openinfradev.github.io/hanu-helm-repo
     skipDepUpdate: true
-    version: 1.0.9
+    version: 1.0.10
   helmVersion: v3
   releaseName: fluentbit-operator
   targetNamespace: lma
@@ -573,7 +543,7 @@ spec:
       default:
         additionalDefaultReceivers: []
         hosts:
-        - https://taco-elasticsearch-es-http.lma.svc.siim-dev:9200
+        - https://eck-elasticsearch-es-http.lma.svc.siim-dev:9200
         index: kube-events
         password: tacoword
         user: elastic
@@ -606,7 +576,7 @@ spec:
     fullnameOverride: lma
     global:
       rbac:
-        create: false
+        create: true
     grafana:
       enabled: false
     kubeApiServer:
@@ -655,6 +625,7 @@ spec:
           taco_cluster: siim-dev
         nodeSelector:
           taco-lma: enabled
+        podMonitorSelectorNilUsesHelmValues: false
         replicas: 1
         retention: 30d
         ruleNamespaceSelector:
@@ -677,7 +648,7 @@ spec:
                   storage: 200Gi
               storageClassName: rbd
         thanos:
-          version: v0.11.0
+          version: v0.18.0
       service:
         nodePort: 30008
         type: NodePort
@@ -816,7 +787,7 @@ spec:
     fullnameOverride: fed-master
     global:
       rbac:
-        create: false
+        create: true
     grafana:
       enabled: false
     kubeApiServer:
@@ -843,6 +814,7 @@ spec:
           taco_cluster: federation-master
         nodeSelector:
           taco-lma: enabled
+        podMonitorSelectorNilUsesHelmValues: false
         replicas: 1
         ruleNamespaceSelector:
           matchLabels:
@@ -912,7 +884,7 @@ spec:
       create: false
     global:
       rbac:
-        create: false
+        create: true
     grafana:
       enabled: false
     kubeApiServer:
@@ -1069,7 +1041,7 @@ spec:
           port: 8080
         type: ClusterIP
       timeout: 5m
-    clusterDomain: cluster.local
+    clusterDomain: siim-dev
     compactor:
       consistencyDelay: 30m
       enabled: true
@@ -1089,7 +1061,7 @@ spec:
           port: 9090
         type: ClusterIP
     global:
-      storageClass: ceph
+      storageClass: rbd
     metrics:
       enabled: false
       serviceMonitor:
@@ -1099,6 +1071,10 @@ spec:
         password: taco
       defaultBuckets: thanos
       enabled: true
+      persistence:
+        accessMode: ReadWriteOnce
+        size: 100Gi
+        storageClass: rbd
       secretKey:
         password: password
       service:
@@ -1108,12 +1084,10 @@ spec:
       type: s3
       config:
         bucket: thanos
-        endpoint: {{ include "thanos.minio.fullname" . }}.fed.svc.cluster.local:9000
+        endpoint: {{ include "thanos.minio.fullname" . }}.fed.svc.siim-dev:9000
         access_key: taco
         secret_key: password
         insecure: true
-    querier:
-      stores: TO_BE_FIXED
     query:
       nodeSelector:
         taco-lma: enabled
@@ -1164,7 +1138,7 @@ spec:
         accessModes:
         - ReadWriteOnce
         enabled: true
-        size: 8Gi
+        size: 80Gi
       service:
         grpc:
           port: 10901
@@ -1173,8 +1147,4 @@ spec:
         type: ClusterIP
     volumePermissions:
       enabled: false
-      image:
-        registry: docker.io
-        repository: bitnami/minideb
-        tag: buster
   wait: true

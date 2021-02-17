@@ -10,6 +10,9 @@ global:
   storageClassName: rbd
   serviceScrapeInterval: 10s
   federateScrapeInterval: 10s
+  defaultPassword: password
+  defaultUser: taco
+
 charts:
 - name: prometheus-operator
   override:
@@ -26,7 +29,7 @@ charts:
     prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName: $(storageClassName)
     prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: 200Gi
     prometheus.prometheusSpec.retention: 30d
-    prometheus.prometheusSpec.externalLabels.taco_cluster: siim-dev
+    prometheus.prometheusSpec.externalLabels.taco_cluster: $(clusterName)
     prometheus.prometheusSpec.nodeSelector: $(nodeSelector)
     
 - name: prometheus-fed-master    
@@ -97,28 +100,28 @@ charts:
 
 - name: eck-resource 
   override:
-    customResource.kibana.nodeSelector: $(nodeSelector)
+    kibana.nodeSelector: $(nodeSelector)
     
-    customResource.elasticsearch.nodeSets.master.nodeSelector: $(nodeSelector)
-    customResource.elasticsearch.nodeSets.master.javaOpts: "-Xms2g -Xmx2g"
-    customResource.elasticsearch.nodeSets.master.limitCpu: 2
-    customResource.elasticsearch.nodeSets.master.limitMem: 4Gi
-    customResource.elasticsearch.nodeSets.master.pvc.storageClassName: $(storageClassName)
-    customResource.elasticsearch.nodeSets.master.pvc.size: 2Gi
+    elasticsearch.nodeSets.master.nodeSelector: $(nodeSelector)
+    elasticsearch.nodeSets.master.javaOpts: "-Xms2g -Xmx2g"
+    elasticsearch.nodeSets.master.limitCpu: 2
+    elasticsearch.nodeSets.master.limitMem: 4Gi
+    elasticsearch.nodeSets.master.pvc.storageClassName: $(storageClassName)
+    elasticsearch.nodeSets.master.pvc.size: 2Gi
 
-    customResource.elasticsearch.nodeSets.hotdata.nodeSelector: $(nodeSelector)
-    customResource.elasticsearch.nodeSets.hotdata.javaOpts: "-Xms10g -Xmx10g"
-    customResource.elasticsearch.nodeSets.hotdata.limitCpu: 2
-    customResource.elasticsearch.nodeSets.hotdata.limitMem: 20Gi
-    customResource.elasticsearch.nodeSets.hotdata.pvc.storageClassName: $(storageClassName)
-    customResource.elasticsearch.nodeSets.hotdata.pvc.size: 200Gi
+    elasticsearch.nodeSets.hotdata.nodeSelector: $(nodeSelector)
+    elasticsearch.nodeSets.hotdata.javaOpts: "-Xms10g -Xmx10g"
+    elasticsearch.nodeSets.hotdata.limitCpu: 2
+    elasticsearch.nodeSets.hotdata.limitMem: 20Gi
+    elasticsearch.nodeSets.hotdata.pvc.storageClassName: $(storageClassName)
+    elasticsearch.nodeSets.hotdata.pvc.size: 200Gi
 
-    customResource.elasticsearch.nodeSets.client.enabled: true
-    customResource.elasticsearch.nodeSets.client.nodeSelector: $(nodeSelector)
-    customResource.elasticsearch.nodeSets.client.javaOpts: "-Xms10g -Xmx10g"
-    customResource.elasticsearch.nodeSets.client.limitCpu: 2
-    customResource.elasticsearch.nodeSets.client.limitMem: 20Gi
-    customResource.elasticsearch.nodeSets.client.pvc.storageClassName: $(storageClassName)
+    elasticsearch.nodeSets.client.enabled: true
+    elasticsearch.nodeSets.client.nodeSelector: $(nodeSelector)
+    elasticsearch.nodeSets.client.javaOpts: "-Xms10g -Xmx10g"
+    elasticsearch.nodeSets.client.limitCpu: 2
+    elasticsearch.nodeSets.client.limitMem: 20Gi
+    elasticsearch.nodeSets.client.pvc.storageClassName: $(storageClassName)
 
 
 - name: grafana  
@@ -137,33 +140,36 @@ charts:
     global.base_cluster_url: $(clusterName)
     global.nodeSelector: $(nodeSelector)
     fluentbit.clusterName: $(clusterName)
-    fluentbit.outputs.es.host: taco-elasticsearch-es-http.lma.svc.$(clusterName)
+    fluentbit.outputs.es.host: eck-elasticsearch-es-http.lma.svc.$(clusterName)
     fluentbit.outputs.kafka:
       enabled: false
       broker: "suy-prd-elk-kfk-01:9092,suy-prd-elk-kfk-02:9092,suy-prd-elk-kfk-03:9092,suy-prd-elk-kfk-04:9092,suy-prd-elk-kfk-05:9092,suy-prd-elk-kfk-06:9092,suy-prd-elk-kfk-07:9092,suy-prd-elk-kfk-08:9092,suy-prd-elk-kfk-09:9092,suy-prd-elk-kfk-10:9092,suy-prd-elk-kfk-11:9092"
       topic: taco-suy-adm-logs
-    fluentbit.esTemplate.url: https://taco-elasticsearch-es-http.lma.svc.$(clusterName):9200
+    fluentbit.esTemplate.url: https://eck-elasticsearch-es-http.lma.svc.$(clusterName):9200
     fluentbit.nodeSelector: $(nodeSelector)
 
 - name: addons  
   override:
-    serviceMonitor.trident:
-      enabled: true
-      interval: $(serviceScrapeInterval)
-    serviceMonitor.kubelet.interval: 30s
+    serviceMonitor.processExporter.interval: $(serviceScrapeInterval)
+    serviceMonitor.ceph.interval: $(serviceScrapeInterval)
+    serviceMonitor.calico.interval: $(serviceScrapeInterval)
+    serviceMonitor.kubeStateMetrics.interval: $(serviceScrapeInterval)
+    serviceMonitor.nodeExporter.interval: $(serviceScrapeInterval)
+    serviceMonitor.kubelet.interval: $(serviceScrapeInterval)
 
 - name: fed-addons  
   override:
     metricbeat.enabled: false
-    metricbeat.elasticsearch.host: https://taco-elasticsearch-es-http.lma.svc.$(clusterName):9200
-    metricbeat.kibana.host: taco-kibana-dashboard-kb-http.lma.svc.$(clusterName):5601
+    metricbeat.elasticsearch.host: https://eck-elasticsearch-es-http.lma.svc.$(clusterName):9200
+    metricbeat.kibana.host: eck-kibana-dashboard-kb-http.lma.svc.$(clusterName):5601
     metricbeat.prometheus.hosts:
     - fed-master-prometheus.fed.svc.$(clusterName):9090
     tacoWatcher.host: taco-watcher.fed.svc.$(clusterName)
-    tacoWatcher.joinCluster.body.kibanaUrl: http://taco-kibana-dashboard-kb-http.lma.svc.$(clusterName):5601
+    tacoWatcher.joinCluster.body.kibanaUrl: http://eck-kibana-dashboard-kb-http.lma.svc.$(clusterName):5601
     tacoWatcher.joinCluster.body.grafanaUrl: http://grafana.fed.svc.$(clusterName)
     tacoWatcher.joinCluster.body.k8sUrl: https://kubernetes.default.svc.$(clusterName)
-    kibanaInit.url: http://taco-kibana-dashboard-kb-http.lma.svc.$(clusterName):5601
+    kibanaInit.url: http://eck-kibana-dashboard-kb-http.lma.svc.$(clusterName):5601
+    serviceMonitor.grafana.interval: $(serviceScrapeInterval)
     serviceMonitor.federations:
     - name: admin-federate
       namespace: lma
@@ -187,4 +193,36 @@ charts:
 - name: kubernetes-event-exporter  
   override:
     conf.default.hosts:
-    - "https://taco-elasticsearch-es-http.lma.svc.$(clusterName):9200"
+    - "https://eck-elasticsearch-es-http.lma.svc.$(clusterName):9200"
+
+- name: thanos
+  override:
+    global.storageClass: $(storageClassName)
+    clusterDomain: $(clusterName)
+    objstoreConfig: |-
+      type: s3
+      config:
+        bucket: thanos
+        endpoint: {{ include "thanos.minio.fullname" . }}.fed.svc.$(clusterName):9000
+        access_key: $(defaultUser)
+        secret_key: $(defaultPassword)
+        insecure: true
+    query.nodeSelector: $(nodeSelector)
+    queryFrontend.nodeSelector: $(nodeSelector)
+    queryFrontend.service.type: NodePort
+    queryFrontend.service.http.nodePort: 30007
+    bucketweb.nodeSelector: $(nodeSelector)
+    compactor.nodeSelector: $(nodeSelector)
+    storegateway.nodeSelector: $(nodeSelector)
+    ruler.nodeSelector: $(nodeSelector)      
+    compactor.persistence.size: 8Gi
+    storegateway.persistence.size: 80Gi
+    ruler.alertmanagers:
+      - http://prometheus-operator-alertmanager:9093
+    ruler.persistence.size: 8Gi
+    minio.accessKey.password: $(defaultUser)
+    minio.secretKey.password: $(defaultPassword)
+    minio.defaultBuckets: thanos
+    minio.persistence.storageClass: $(storageClassName)
+    minio.persistence.accessMode: ReadWriteOnce
+    minio.persistence.size: 100Gi
