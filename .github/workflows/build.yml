@@ -29,3 +29,12 @@ jobs:
           .github/workflows/render.sh lma
           .github/workflows/render.sh openstack
 
+      - name: Trigger jenkins job
+        uses: jabbukka/jenkins-trigger@main
+        with:
+          url: ${{ secrets.JENKINS_URL }}
+          job_name: "deploy-apps"
+          user_name: ${{ secrets.JENKINS_USER }}
+          api_token: ${{ secrets.JENKINS_TOKEN }}
+          wait: "true"
+          timeout: "3600"

@@ -16,10 +16,6 @@ charts:
   override:
     prometheusOperator.nodeSelector: $(nodeSelector)
 
-- name: elasticsearch-operator
-  source:
-    repository: $(repository)
-
 - name: prometheus
   override:
     kubeEtcd.endpoints:
@@ -51,29 +47,36 @@ charts:
   source:
     repository: $(repository)
 
-- name: elasticsearch-kibana
-  source:
-    repository: $(repository)
+- name: eck-resource
   override:
-    customResource.kibana.nodeSelector: $(nodeSelector)
+    kibana.nodeSelector: $(nodeSelector)
     
-    customResource.elasticsearch.nodeSets.master.nodeSelector: $(nodeSelector)
-    customResource.elasticsearch.nodeSets.master.count: 1
-    customResource.elasticsearch.nodeSets.master.javaOpts: "-Xms1g -Xmx1g"
-    customResource.elasticsearch.nodeSets.master.limitCpu: 2
-    customResource.elasticsearch.nodeSets.master.limitMem: 2Gi
-    customResource.elasticsearch.nodeSets.master.pvc.storageClassName: $(storageClassName)
-    customResource.elasticsearch.nodeSets.master.pvc.size: 1Gi
+    elasticsearch.nodeSets.master.nodeSelector: $(nodeSelector)
+    elasticsearch.nodeSets.master.count: 1
+    elasticsearch.nodeSets.master.javaOpts: "-Xms1g -Xmx1g"
+    elasticsearch.nodeSets.master.limitCpu: 2
+    elasticsearch.nodeSets.master.limitMem: 4Gi
+    elasticsearch.nodeSets.master.pvc.storageClassName: $(storageClassName)
+    elasticsearch.nodeSets.master.pvc.size: 1Gi
 
-    customResource.elasticsearch.nodeSets.hotdata.nodeSelector: $(nodeSelector)
-    customResource.elasticsearch.nodeSets.hotdata.count: 1
-    customResource.elasticsearch.nodeSets.hotdata.javaOpts: "-Xms1g -Xmx1g"
-    customResource.elasticsearch.nodeSets.hotdata.limitCpu: 2
-    customResource.elasticsearch.nodeSets.hotdata.limitMem: 2Gi
-    customResource.elasticsearch.nodeSets.hotdata.pvc.storageClassName: $(storageClassName)
-    customResource.elasticsearch.nodeSets.hotdata.pvc.size: 10Gi
+    elasticsearch.nodeSets.hotdata.nodeSelector: $(nodeSelector)
+    elasticsearch.nodeSets.hotdata.count: 1
+    elasticsearch.nodeSets.hotdata.javaOpts: "-Xms1g -Xmx1g"
+    elasticsearch.nodeSets.hotdata.limitCpu: 2
+    elasticsearch.nodeSets.hotdata.limitMem: 2Gi
+    elasticsearch.nodeSets.hotdata.pvc.storageClassName: $(storageClassName)
+    elasticsearch.nodeSets.hotdata.pvc.size: 10Gi
 
-    customResource.elasticsearch.nodeSets.client.enabled: false
+    elasticsearch.nodeSets.client.enabled: false
+    elasticsearch.http:
+      service:
+        spec:
+          type: NodePort
+          ports:
+          - name: https
+            nodePort: 30002
+            targetPort: 9002
+            port: 9002
 
 - name: grafana
   override:
@@ -95,10 +98,10 @@ charts:
     global.base_cluster_url: $(clusterName)
     global.nodeSelector: $(nodeSelector)
     fluentbit.clusterName: $(clusterName)
-    fluentbit.outputs.es.host: taco-elasticsearch-es-http.lma.svc.$(clusterName)
+    fluentbit.outputs.es.host: eck-elasticsearch-es-http.lma.svc.$(clusterName)
     fluentbit.outputs.kafka:
       enabled: false
-    fluentbit.esTemplate.url: https://taco-elasticsearch-es-http.lma.svc.$(clusterName):9200
+    fluentbit.esTemplate.url: https://eck-elasticsearch-es-http.lma.svc.$(clusterName):9200
     fluentbit.nodeSelector: $(nodeSelector)
     fluentbit.targetLogs:
        - bufferChunkSize: 2M
@@ -137,15 +140,15 @@ charts:
   source:
     repository: $(repository)
   override:
-    metricbeat.elasticsearch.host: https://taco-elasticsearch-es-http.lma.svc.$(clusterName):9200
-    metricbeat.kibana.host: taco-kibana-dashboard-kb-http.lma.svc.$(clusterName):5601
+    metricbeat.elasticsearch.host: https://eck-elasticsearch-es-http.lma.svc.$(clusterName):9200
+    metricbeat.kibana.host: eck-kibana-dashboard-kb-http.lma.svc.$(clusterName):5601
     metricbeat.prometheus.hosts:
     - fed-master-prometheus.fed.svc.$(clusterName):9090
     # tacoWatcher.host: taco-watcher.fed.svc.$(clusterName)
-    # tacoWatcher.joinCluster.body.kibanaUrl: http://taco-kibana-dashboard-kb-http.lma.svc.$(clusterName):5601
+    # tacoWatcher.joinCluster.body.kibanaUrl: http://eck-kibana-dashboard-kb-http.lma.svc.$(clusterName):5601
     # tacoWatcher.joinCluster.body.grafanaUrl: http://grafana.fed.svc.$(clusterName)
     # tacoWatcher.joinCluster.body.k8sUrl: https://kubernetes.default.svc.$(clusterName)
-    kibanaInit.url: http://taco-kibana-dashboard-kb-http.lma.svc.$(clusterName):5601
+    kibanaInit.url: http://eck-kibana-dashboard-kb-http.lma.svc.$(clusterName):5601
 
 - name: prometheus-adapter
   override:
@@ -156,4 +159,4 @@ charts:
     repository: $(repository)
   override:
     conf.default.hosts:
-    - "https://taco-elasticsearch-es-http.lma.svc.$(clusterName):9200"
+    - "https://eck-elasticsearch-es-http.lma.svc.$(clusterName):9200"
