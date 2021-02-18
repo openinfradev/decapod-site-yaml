@@ -64,9 +64,6 @@ pipeline {
             git clone https://github.com/openinfradev/decapod-site-yaml.git
             cd decapod-site-yaml && git checkout -b $BRANCH_NAME
 
-            #sed -i 's/TACO_MON_HOST/ceph_mon_host/g' openstack/site/hanu-deploy-apps/*-manifest.yaml
-            #git status
-            #git commit -a -m "replace TACO_XXX variables" --author="Esther Kim <jabbukka@naver.com>"
             git push origin $BRANCH_NAME
             cd ..
           """
