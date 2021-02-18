@@ -68,6 +68,15 @@ charts:
     elasticsearch.nodeSets.hotdata.pvc.size: 10Gi
 
     elasticsearch.nodeSets.client.enabled: false
+    elasticsearch.http:
+      service:
+        spec:
+          type: NodePort
+          ports:
+          - name: https
+            nodePort: 30002
+            targetPort: 9002
+            port: 9002
 
 - name: grafana
   override:

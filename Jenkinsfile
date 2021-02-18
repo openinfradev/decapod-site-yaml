@@ -14,7 +14,7 @@ pipeline {
       description: 'Apps to deploy on k8s cluster(comma-seperated list)'
     )
     booleanParam(name: 'CLEANUP',
-      defaultValue: true,
+      defaultValue: false,
       description: 'delete VM once job is finished?'
     )
   }
@@ -100,7 +100,7 @@ pipeline {
     success {
       script {
         if ( params.CLEANUP == true ) {
-          deleteOpenstackVMs(vmNamePrefix, nameKey, 'openstack-pangyo')
+          deleteOpenstackVMs(vmNamePrefixRand, "", 'openstack-pangyo')
         } else {
           echo "Skipping VM cleanup.."
         }
