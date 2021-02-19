@@ -21,29 +21,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
-      - name: Branch name
-        run: echo running on branch ${GITHUB_REF##*/}
-
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-
-      - name: Run render.sh
-        run: |
-          set -xe
-          chmod +x .github/workflows/render.sh
-          .github/workflows/render.sh lma
-          .github/workflows/render.sh openstack
-
-      - name: Trigger jenkins job
-        uses: jabbukka/jenkins-trigger@main
-        with:
-          url: ${{ secrets.JENKINS_URL }}
-          job_name: "deploy-apps"
-          user_name: ${{ secrets.JENKINS_USER }}
-          api_token: ${{ secrets.JENKINS_TOKEN }}
-          wait: "true"
-          timeout: "3600"
-          parameter: "{\"SITE_BRANCH\":\"${{steps.extract_branch.outputs.branch}}\"}"
+      - uses: nelonoel/branch-name@v1
+      # Use branch name for whatever purpose
+      - run: echo ${BRANCH_NAME}
+      
