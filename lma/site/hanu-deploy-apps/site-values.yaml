@@ -10,6 +10,8 @@ global:
   storageClassName: rbd
   repository: https://openinfradev.github.io/hanu-helm-repo/
   serviceScrapeInterval: 30s
+  defaultPassword: password
+  defaultUser: taco
 
 charts:
 - name: prometheus-operator
@@ -160,3 +162,18 @@ charts:
   override:
     conf.default.hosts:
     - "https://eck-elasticsearch-es-http.lma.svc.$(clusterName):9200"
+
+- name: thanos
+  override:
+    global.storageClass: $(storageClassName)
+    clusterDomain: $(clusterName)
+    query.nodeSelector: $(nodeSelector)
+    queryFrontend.nodeSelector: $(nodeSelector)
+    bucketweb.nodeSelector: $(nodeSelector)
+    compactor.nodeSelector: $(nodeSelector)
+    storegateway.nodeSelector: $(nodeSelector)
+    ruler.nodeSelector: $(nodeSelector)
+    ruler.persistence.size: 8Gi
+    minio.accessKey.password: $(defaultUser)
+    minio.secretKey.password: $(defaultPassword)
+    minio.persistence.storageClass: $(storageClassName)
