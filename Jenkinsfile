@@ -78,9 +78,26 @@ pipeline {
             cp /opt/jenkins/.ssh/jenkins-slave-hanukey ./jenkins.key
             scp -o StrictHostKeyChecking=no -i jenkins.key -r taco-gate-inventories/workflows/* taco-gate-inventories/scripts/deployApps.sh taco@$ADMIN_NODE_IP:/home/taco/
             ssh -o StrictHostKeyChecking=no -i jenkins.key taco@$ADMIN_NODE_IP chmod 0755 /home/taco/deployApps.sh
-            ssh -o StrictHostKeyChecking=no -i jenkins.key taco@$ADMIN_NODE_IP /home/taco/deployApps.sh --apps ${params.DEPLOY_APPS} --site hanu-deploy-apps --branch jenkins 
-            # To be fixed: $BRANCH_NAME
+            ssh -o StrictHostKeyChecking=no -i jenkins.key taco@$ADMIN_NODE_IP /home/taco/deployApps.sh --apps ${params.DEPLOY_APPS} --site hanu-deploy-apps --branch $BRANCH_NAME
           """
+        }
+      }
+    }
+    stage ('Validate LMA') {
+      when {
+        expression { params.DEPLOY_APPS.contains("lma") }
+      }
+      steps {
+        script {
+            def job = build(
+              job: "validate-lma",
+              parameters: [
+                string(name: 'KUBERNETES_CLUSTER_IP', value: "${ADMIN_NODE_IP}")
+              ],
+              propagate: true
+            )
+            res = job.getResult()
+            println("Validate-lma Result: ${res}")
         }
       }
     }
