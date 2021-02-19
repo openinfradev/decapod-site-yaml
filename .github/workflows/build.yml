@@ -8,8 +8,6 @@ on:
   pull_request:
     branches:
       - 'main'
-
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -19,9 +17,18 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - run: echo ${{ github.head_ref }}
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      - uses: nelonoel/branch-name@v1
-      # Use branch name for whatever purpose
-      - run: echo ${BRANCH_NAME}
-      
+
+      - name: Trigger jenkins job
+        uses: jabbukka/jenkins-trigger@main
+        with:
+          url: ${{ secrets.JENKINS_URL }}
+          job_name: "validate-lma"
+          user_name: ${{ secrets.JENKINS_USER }}
+          api_token: ${{ secrets.JENKINS_TOKEN }}
+          wait: "true"
+          timeout: "3600"
+          parameter: "{\"KUBERNETES_CLUSTER_IP\":\"${{ github.head_ref }}\"}"
