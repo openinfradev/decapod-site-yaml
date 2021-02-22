@@ -38,3 +38,4 @@ jobs:
           api_token: ${{ secrets.JENKINS_TOKEN }}
           wait: "true"
           timeout: "3600"
+          parameter: "{\"SITE_BRANCH\":\"${{ github.head_ref }}\"}"

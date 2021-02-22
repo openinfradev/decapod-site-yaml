@@ -10,11 +10,15 @@ global:
   storageClassName: rbd
   repository: https://openinfradev.github.io/hanu-helm-repo/
   serviceScrapeInterval: 30s
+  defaultPassword: password
+  defaultUser: taco
 
 charts:
 - name: prometheus-operator
   override:
     prometheusOperator.nodeSelector: $(nodeSelector)
+
+- name: eck-operator
 
 - name: prometheus
   override:
@@ -35,6 +39,8 @@ charts:
     prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName: $(storageClassName)
     prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: 20Gi
   
+- name: prometheus-node-exporter  
+
 - name: kube-state-metrics
   override:
     nodeSelector: $(nodeSelector)
@@ -44,8 +50,8 @@ charts:
     nodeSelector: $(nodeSelector)
 
 - name: prometheus-process-exporter
-  source:
-    repository: $(repository)
+  override:
+    conf.processes: dockerd,kubelet,kube-proxy,ntpd,node
 
 - name: eck-resource
   override:
@@ -68,15 +74,7 @@ charts:
     elasticsearch.nodeSets.hotdata.pvc.size: 10Gi
 
     elasticsearch.nodeSets.client.enabled: false
-    elasticsearch.http:
-      service:
-        spec:
-          type: NodePort
-          ports:
-          - name: https
-            nodePort: 30002
-            targetPort: 9002
-            port: 9002
+
 
 - name: grafana
   override:
@@ -84,16 +82,12 @@ charts:
     persistence.storageClassName: $(storageClassName)
 
 - name: fluentbit-operator
-  source:
-    repository: $(repository)
   override:
     global.base_cluster_url: $(clusterName)
     fluentbitOperator.nodeSelector: $(nodeSelector)
     logExporter.nodeSelector: $(nodeSelector)
 
 - name: fluentbit
-  source:
-    repository: $(repository)
   override:
     global.base_cluster_url: $(clusterName)
     global.nodeSelector: $(nodeSelector)
@@ -126,8 +120,6 @@ charts:
          type: syslog
 
 - name: addons
-  source:
-    repository: $(repository)
   override:
     SPECIAL_VALUE: SPECIAL
     serviceMonitor.trident:
@@ -137,9 +129,8 @@ charts:
     serviceMonitor.additionalScrapeConfigs:
 
 - name: fed-addons
-  source:
-    repository: $(repository)
   override:
+    metricbeat.enabled: false
     metricbeat.elasticsearch.host: https://eck-elasticsearch-es-http.lma.svc.$(clusterName):9200
     metricbeat.kibana.host: eck-kibana-dashboard-kb-http.lma.svc.$(clusterName):5601
     metricbeat.prometheus.hosts:
@@ -155,8 +146,40 @@ charts:
     nodeSelector: $(nodeSelector)
 
 - name: kubernetes-event-exporter
-  source:
-    repository: $(repository)
   override:
     conf.default.hosts:
     - "https://eck-elasticsearch-es-http.lma.svc.$(clusterName):9200"
+
+- name: thanos
+  override:
+    global.storageClass: $(storageClassName)
+    clusterDomain: $(clusterName)
+    objstoreConfig: |-
+      type: s3
+      config:
+        bucket: thanos
+        endpoint: {{ include "thanos.minio.fullname" . }}.fed.svc.$(clusterName):9000
+        access_key: $(defaultUser)
+        secret_key: $(defaultPassword)
+        insecure: true
+    query.nodeSelector: $(nodeSelector)
+    queryFrontend.nodeSelector: $(nodeSelector)
+    queryFrontend.service.type: NodePort
+    queryFrontend.service.http.nodePort: 30007
+    querier.stores:
+    - prometheus-operated.lma.svc.$(clusterName):10901
+    bucketweb.nodeSelector: $(nodeSelector)
+    compactor.nodeSelector: $(nodeSelector)
+    storegateway.nodeSelector: $(nodeSelector)
+    ruler.nodeSelector: $(nodeSelector)
+    compactor.persistence.size: 8Gi
+    storegateway.persistence.size: 8Gi
+    ruler.alertmanagers:
+      - http://prometheus-operator-alertmanager:9093
+    ruler.persistence.size: 8Gi
+    minio.accessKey.password: $(defaultUser)
+    minio.secretKey.password: $(defaultPassword)
+    minio.defaultBuckets: thanos
+    minio.persistence.storageClass: $(storageClassName)
+    minio.persistence.accessMode: ReadWriteOnce
+    minio.persistence.size: 10Gi

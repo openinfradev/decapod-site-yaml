@@ -13,6 +13,10 @@ pipeline {
       defaultValue: 'lma',
       description: 'Apps to deploy on k8s cluster(comma-seperated list)'
     )
+    string(name: 'SITE_BRANCH',
+      defaultValue: 'main',
+      description: 'Branch name for decapod-site-yaml'
+    )
     booleanParam(name: 'CLEANUP',
       defaultValue: false,
       description: 'delete VM once job is finished?'
@@ -61,7 +65,7 @@ pipeline {
           }
           BRANCH_NAME = "jenkins-deploy-${env.BUILD_NUMBER}"
           sh """
-            git clone https://github.com/openinfradev/decapod-site-yaml.git
+            git clone -b $SITE_BRANCH https://github.com/openinfradev/decapod-site-yaml.git
             cd decapod-site-yaml && git checkout -b $BRANCH_NAME
 
             git push origin $BRANCH_NAME
