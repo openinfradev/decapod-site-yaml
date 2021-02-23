@@ -9,13 +9,17 @@ pipeline {
   }
 
   parameters {
-    string(name: 'DEPLOY_APPS',
+    string(name: 'APPS',
       defaultValue: 'lma',
       description: 'Apps to deploy on k8s cluster(comma-seperated list)'
     )
     string(name: 'SITE_BRANCH',
       defaultValue: 'main',
       description: 'Branch name for decapod-site-yaml'
+    )
+    string(name: 'K8S_VM_NAME',
+      defaultValue: '',
+      description: 'Name of the Kubernetes VM on which the apps are deployed'
     )
     booleanParam(name: 'CLEANUP',
       defaultValue: false,
@@ -32,8 +36,12 @@ pipeline {
             cp taco-gate-inventories/config/pangyo-clouds.yml ./clouds.yaml
           """
 
-          vmNamePrefixRand = getK8sVmName("k8s_endpoint")
-          vmIPs = getOpenstackVMinfo(vmNamePrefixRand, 'private-mgmt-online', 'openstack-pangyo')
+          vmNamePrefix = params.K8S_VM_NAME
+          if (!params.K8S_VM_NAME) {
+            vmNamePrefix = getK8sVmName("k8s_endpoint")
+          }
+
+          vmIPs = getOpenstackVMinfo(vmNamePrefix, 'private-mgmt-online', 'openstack-pangyo')
           ceph_mon_host=""
 
           nodeCount = 0
@@ -82,14 +90,14 @@ pipeline {
             cp /opt/jenkins/.ssh/jenkins-slave-hanukey ./jenkins.key
             scp -o StrictHostKeyChecking=no -i jenkins.key -r taco-gate-inventories/workflows/* taco-gate-inventories/scripts/deployApps.sh taco@$ADMIN_NODE_IP:/home/taco/
             ssh -o StrictHostKeyChecking=no -i jenkins.key taco@$ADMIN_NODE_IP chmod 0755 /home/taco/deployApps.sh
-            ssh -o StrictHostKeyChecking=no -i jenkins.key taco@$ADMIN_NODE_IP /home/taco/deployApps.sh --apps ${params.DEPLOY_APPS} --site hanu-deploy-apps --branch $BRANCH_NAME
+            ssh -o StrictHostKeyChecking=no -i jenkins.key taco@$ADMIN_NODE_IP /home/taco/deployApps.sh --apps ${params.APPS} --site hanu-deploy-apps --branch $BRANCH_NAME
           """
         }
       }
     }
     stage ('Validate LMA') {
       when {
-        expression { params.DEPLOY_APPS.contains("lma") }
+        expression { params.APPS.contains("lma") }
       }
       steps {
         script {
