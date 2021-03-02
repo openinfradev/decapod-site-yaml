@@ -406,6 +406,14 @@ charts:
     monitoring.prometheus.rabbitmq_exporter.scrape: true
     endpoints.cluster_domain_suffix: $(clusterName)
 
+- name: ironic
+  source:
+    repository: $(repository)
+
+- name: sona
+  source:
+    repository: $(repository)
+
 #- name: prometheus-kube-state-metrics
 #  source:
 #    repository: $(repository)
@@ -423,14 +431,14 @@ charts:
 #    storage.storage_class: $(storageClassName)
 #    storage.requests.storage: 22Gi
 
-#- name: prometheus-openstack-exporter
-#  source:
-#    repository: $(repository)
-#  override:
-#    endpoints.identity.name: keystone
-#    endpoints.identity.auth.admin.region_name: RegionOne
-#    endpoints.identity.auth.admin.username: admin
-#    endpoints.identity.auth.admin.password: $(adminPassword)
-#    dummy: dummy
-#    pod.mandatory_access_control.type: null
+- name: prometheus-openstack-exporter
+  source:
+    repository: $(repository)
+  override:
+    endpoints.identity.name: keystone
+    endpoints.identity.auth.admin.region_name: RegionOne
+    endpoints.identity.auth.admin.username: admin
+    endpoints.identity.auth.admin.password: $(adminPassword)
+    dummy: dummy
+    pod.mandatory_access_control.type: null
 
