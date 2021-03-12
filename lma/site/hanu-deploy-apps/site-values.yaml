@@ -34,11 +34,11 @@ charts:
   override:
     alertmanager.alertmanagerSpec.nodeSelector: $(nodeSelector)
     alertmanager.alertmanagerSpec.retention: 2h
-    alertmanager.config.global.slack_api_url: https://hooks.slack.com/services/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
+    alertmanager.config.global.slack_api_url: https://hooks.slack.com/services/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
     prometheus.prometheusSpec.nodeSelector: $(nodeSelector)
     prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName: $(storageClassName)
     prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: 20Gi
-  
+
 - name: prometheus-node-exporter  
 
 - name: kube-state-metrics
@@ -171,11 +171,11 @@ charts:
     bucketweb.nodeSelector: $(nodeSelector)
     compactor.nodeSelector: $(nodeSelector)
     storegateway.nodeSelector: $(nodeSelector)
-    ruler.nodeSelector: $(nodeSelector)
     compactor.persistence.size: 8Gi
     storegateway.persistence.size: 8Gi
+    ruler.nodeSelector: $(nodeSelector)
     ruler.alertmanagers:
-      - http://prometheus-operator-alertmanager:9093
+      - http://fed-master-alertmanager.fed.svc.$(clusterName):9093
     ruler.persistence.size: 8Gi
     minio.accessKey.password: $(defaultUser)
     minio.secretKey.password: $(defaultPassword)

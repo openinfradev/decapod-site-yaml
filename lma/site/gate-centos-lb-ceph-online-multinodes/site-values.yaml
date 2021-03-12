@@ -10,6 +10,8 @@ global:
   storageClassName: rbd
   repository: https://openinfradev.github.io/hanu-helm-repo/
   serviceScrapeInterval: 30s
+  defaultPassword: password
+  defaultUser: taco
 
 charts:
 - name: prometheus-operator
@@ -30,7 +32,7 @@ charts:
   override:
     alertmanager.alertmanagerSpec.nodeSelector: $(nodeSelector)
     alertmanager.alertmanagerSpec.retention: 2h
-    alertmanager.config.global.slack_api_url: https://hooks.slack.com/services/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
+    alertmanager.config.global.slack_api_url: https://hooks.slack.com/services/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
     prometheus.prometheusSpec.nodeSelector: $(nodeSelector)
     prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName: $(storageClassName)
     prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: 20Gi
@@ -160,3 +162,37 @@ charts:
   override:
     conf.default.hosts:
     - "https://eck-elasticsearch-es-http.lma.svc.$(clusterName):9200"
+
+- name: thanos
+  override:
+    global.storageClass: $(storageClassName)
+    clusterDomain: $(clusterName)
+    objstoreConfig: |-
+      type: s3
+      config:
+        bucket: thanos
+        endpoint: {{ include "thanos.minio.fullname" . }}.fed.svc.$(clusterName):9000
+        access_key: $(defaultUser)
+        secret_key: $(defaultPassword)
+        insecure: true
+    query.nodeSelector: $(nodeSelector)
+    queryFrontend.nodeSelector: $(nodeSelector)
+    queryFrontend.service.type: NodePort
+    queryFrontend.service.http.nodePort: 30007
+    querier.stores:
+    - prometheus-operated.lma.svc.$(clusterName):10901
+    bucketweb.nodeSelector: $(nodeSelector)
+    compactor.nodeSelector: $(nodeSelector)
+    storegateway.nodeSelector: $(nodeSelector)
+    compactor.persistence.size: 8Gi
+    storegateway.persistence.size: 8Gi
+    ruler.nodeSelector: $(nodeSelector)
+    ruler.alertmanagers:
+      - http://fed-master-alertmanager.fed.svc.$(clusterName):9093
+    ruler.persistence.size: 8Gi
+    minio.accessKey.password: $(defaultUser)
+    minio.secretKey.password: $(defaultPassword)
+    minio.defaultBuckets: thanos
+    minio.persistence.storageClass: $(storageClassName)
+    minio.persistence.accessMode: ReadWriteOnce
+    minio.persistence.size: 10Gi
