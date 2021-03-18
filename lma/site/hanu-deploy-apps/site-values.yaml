@@ -172,10 +172,13 @@ charts:
     compactor.nodeSelector: $(nodeSelector)
     storegateway.nodeSelector: $(nodeSelector)
     compactor.persistence.size: 8Gi
+    # compactor.extraFlags:
+    # - --compact.enable-vertical-compaction
+    # - --deduplication.replica-label="replica"
     storegateway.persistence.size: 8Gi
     ruler.nodeSelector: $(nodeSelector)
     ruler.alertmanagers:
-      - http://fed-master-alertmanager.fed.svc.$(clusterName):9093
+    - http://fed-master-alertmanager.fed.svc.$(clusterName):9093
     ruler.persistence.size: 8Gi
     minio.accessKey.password: $(defaultUser)
     minio.secretKey.password: $(defaultPassword)
