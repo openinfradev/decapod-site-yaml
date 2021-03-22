@@ -1,4 +1,7 @@
-# decapod-site-yaml
+# (Deprecated) decapod-site-yaml
+> :warning: **Notice**: 
+> **decapod-site-yaml** is deprecated. It has been moved to [decapod-site](https://github.com/openinfradev/decapod-site).  
+
 Sample YAML including site values of HANU CI environment.  
 
 ## Documents
